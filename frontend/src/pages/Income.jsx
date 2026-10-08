@@ -71,12 +71,30 @@ const Income = () => {
     overdue: 'bg-red-100 text-red-800',
   }[s]);
 
+  const exportCSV = () => {
+  const headers = ['Project', 'Amount', 'Status', 'Date', 'Description'];
+  const rows = incomes.map((inc) => [
+    inc.project?.name, inc.amount, inc.paymentStatus,
+    inc.paymentDate ? new Date(inc.paymentDate).toLocaleDateString() : '', inc.description || '',
+  ]);
+  const csv = [headers, ...rows].map((r) => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'income-report.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast.success('CSV exported!');
+};
+
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Income Tracker</h1>
         <button onClick={() => { setForm({ project: '', amount: '', paymentStatus: 'pending', paymentDate: '', description: '' }); setEditId(null); setShowModal(true); }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add Income</button>
+          <button onClick={exportCSV} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">📥 Export CSV</button>
       </div>
 
       <div className="mb-4">
